@@ -145,9 +145,9 @@ def refresh():
     os.system('cls')
     print("Score: {S}".format(S=score))
     print("Level: {L}".format(L=level))
-    print("XP: {C}/10".format(C=cleared))
-    print(grid)
-    print("Next:\n{N}\n".format(N=next_block.shape[0]))
+    print("XP: {C}/10\n".format(C=cleared))
+    print(grid, "\n")
+    print("Next:\n{N}".format(N=next_block.shape[0]))
         
 # GLOBAL DEFINITIONS ==============================================================
 
