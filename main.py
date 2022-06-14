@@ -35,6 +35,7 @@ class Block:
         for y in range(self.bounds[1]):
             for x in range(self.bounds[0]):
                 #empty blocks shouldn't be considered; they're empty space anyways!
+                #NOTE this function works by considering the current shape as-is on its template and comparing it to its FILLED parts on the grid
                 if self.current_shape[y][x] == EMPTY:
                     continue
                 
@@ -44,6 +45,7 @@ class Block:
                 next_x = pos_x + dir[0]
                 next_y = pos_y + dir[1]
                 
+                #NOTE position is relative to individual blocks; NOT whole shape
                 is_within_bounds = (next_x >= 0 and next_x < SIZE[0]) and (next_y >= 0 and next_y < SIZE[1])   
                 
                 if not is_within_bounds:
@@ -131,6 +133,7 @@ def refresh():
     print("Current Shape:\n{CS}".format(CS=active_block.shape[0]))
     print("\n==DEBUG INFO==\n")
     print("full = {F}".format(F=len(row_is_full(grid))))
+    print("pos = {P}".format(P=active_block.pos))
         
 # GLOBAL DEFINITIONS ==============================================================
 
