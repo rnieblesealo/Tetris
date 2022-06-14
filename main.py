@@ -13,18 +13,13 @@ class Block:
     shape = None
     current_shape = None #current shape
     
-    def __init__(self, grid, shape, pos) -> None:
+    def __init__(self, shape, pos) -> None:
         self.pos = pos
         self.rot = 0
         self.bounds = (len(shape[0]), len(shape[0][0]))
         self.shape = shape
         self.current_shape = self.shape[self.rot]
-
-        #add block to grid by copying from current shape
-        for y in range(self.bounds[1]):
-            for x in range(self.bounds[0]):
-                grid[y + self.pos[1]][x + self.pos[0]] = self.current_shape[y][x]
-    
+            
     def can_move(self, grid, dir):
         for y in range(self.bounds[1]):
             for x in range(self.bounds[0]):
@@ -65,7 +60,7 @@ class Block:
                     return False
         return True
 
-    def place(self, grid):
+    def place(self, grid):    
         #copy the current shape to the grid
         for y in range(self.bounds[1]):
             for x in range(self.bounds[0]):
@@ -137,13 +132,22 @@ def delete_row(grid, y):
             #proceed
             y -= 1
 
+def can_spawn_block(grid, block):
+    for y in range(block.bounds[1]):
+        for x in range(block.bounds[0]):
+            if block.current_shape[y][x] == EMPTY:
+                continue
+            if grid[y + block.pos[1]][x + block.pos[0]] == FULL:
+                return False
+    return True
+
 def refresh():
     os.system('cls')
     print("Score: {S}".format(S=score))
     print("Level: {L}".format(L=level))
     print("XP: {C}/10".format(C=cleared))
     print(grid)
-    print("Current Shape:\n{CS}\n".format(CS=active_block.shape[0]))
+    print("Next:\n{N}\n".format(N=next_block.shape[0]))
         
 # GLOBAL DEFINITIONS ==============================================================
 
@@ -164,14 +168,26 @@ level = 0
 cleared = 0
 
 grid = np.full((SIZE[1], SIZE[0]), EMPTY, dtype=str)
-active_block = Block(grid, BLOCKS[randint(0, len(BLOCKS) - 1)], [3, 0])
+
+active_block = Block(BLOCKS[randint(0, len(BLOCKS) - 1)], [3, 0])
+active_block.place(grid)
+
+next_block = Block(BLOCKS[randint(0, len(BLOCKS) - 1)], [3, 0])
 
 # MAIN LOOP ======================================================================
 
 refresh()
 while True:
     if not active_block.can_move(grid, [0, 1]):
-        active_block = Block(grid, BLOCKS[randint(0, len(BLOCKS) - 1)], [3, 0])
+        if not can_spawn_block(grid, next_block) and not is_row_empty(grid, next_block.bounds[1] - 1):
+            refresh()
+            print("\nGAME OVER!")
+            break
+        
+        active_block = next_block
+        active_block.place(grid)
+        
+        next_block = Block(BLOCKS[randint(0, len(BLOCKS) - 1)], [3, 0])
 
         #check line clears when changing shapes to clear multiple lines at once and not one by one
         full_rows = get_full_rows(grid)
