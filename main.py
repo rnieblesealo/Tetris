@@ -135,8 +135,8 @@ def delete_row(grid, y):
         for x in range(SIZE[0]):
             grid[y][x] = EMPTY
         while (not is_row_empty(grid, y - 1)) and (y - 1 > 0):
-            #swap empty row w/previous
-            temp = grid[y].copy()
+            #swap empty row w/previous (think of it as bubble sort)
+            temp = grid[y].copy() #must copy as assign is by reference by default
             grid[y] = grid[y - 1]
             grid[y - 1] = temp
             
@@ -149,9 +149,6 @@ def refresh():
     print("High Score: {HS}".format(HS=high_score))
     print(grid)
     print("Current Shape:\n{CS}\n".format(CS=active_block.shape[0]))
-    print("---DEBUG INFO---\n")
-    print("full_count = {F}".format(F=len(get_full_rows(grid))))
-    print("active_pos = {P}".format(P=active_block.pos))
         
 # GLOBAL DEFINITIONS ==============================================================
 
