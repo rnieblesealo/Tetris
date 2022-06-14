@@ -5,7 +5,7 @@ import numpy as np
 import sys, os, msvcrt
 
 from random import randint
-from blocks import BLOCKS
+from blocks import BLOCKS, I_BLOCK
 
 #TODO add spawnchecking: cant spawn block on another one!
 #TODO give score when row is full and shift everything down
@@ -19,7 +19,7 @@ class Block:
     shape = None
     current_shape = None #current shape
     
-    def __init__(self, grid, shape, pos, rot) -> None:
+    def __init__(self, grid, shape, pos) -> None:
         self.pos = pos
         self.rot = 0
         self.bounds = (len(shape[0]), len(shape[0][0]))
@@ -114,8 +114,13 @@ class Block:
         self.current_shape = self.shape[self.rot]
         self.place(grid)
 
+def is_row_empty(grid, y):
+    for x in range(SIZE[0]):
+        if grid[y][x] == FULL:
+            return False
+    return True
 
-def row_is_full(grid):
+def get_full_rows(grid):
     full_rows = []
     for y in range(SIZE[1]):
         for x in range(SIZE[0]):
@@ -125,15 +130,28 @@ def row_is_full(grid):
             full_rows.append(y)
     return full_rows
 
+def delete_row(grid, y):
+    #NOTE assuming there are no non-contiguous full rows when more than 1 is present
+        for x in range(SIZE[0]):
+            grid[y][x] = EMPTY
+        while (not is_row_empty(grid, y - 1)) and (y - 1 > 0):
+            #swap empty row w/previous
+            temp = grid[y].copy()
+            grid[y] = grid[y - 1]
+            grid[y - 1] = temp
+            
+            #proceed
+            y -= 1
+
 def refresh():
     os.system('cls')
     print("Score: {S}".format(S=score))
     print("High Score: {HS}".format(HS=high_score))
     print(grid)
-    print("Current Shape:\n{CS}".format(CS=active_block.shape[0]))
-    print("\n==DEBUG INFO==\n")
-    print("full = {F}".format(F=len(row_is_full(grid))))
-    print("pos = {P}".format(P=active_block.pos))
+    print("Current Shape:\n{CS}\n".format(CS=active_block.shape[0]))
+    print("---DEBUG INFO---\n")
+    print("full_count = {F}".format(F=len(get_full_rows(grid))))
+    print("active_pos = {P}".format(P=active_block.pos))
         
 # GLOBAL DEFINITIONS ==============================================================
 
@@ -150,14 +168,20 @@ SIZE = (10, 20)
 score = 0
 high_score = 0
 grid = np.full((SIZE[1], SIZE[0]), EMPTY, dtype=str)
-active_block = Block(grid, BLOCKS[randint(0, len(BLOCKS) - 1)], [3, 0], 0)
+active_block = Block(grid, I_BLOCK, [3, 0])
 
 # MAIN LOOP ======================================================================
 
 refresh()
 while True:
     if not active_block.can_move(grid, [0, 1]):
-        active_block = Block(grid, BLOCKS[randint(0, len(BLOCKS) - 1)], [3, 0], 0)
+        active_block = Block(grid, I_BLOCK, [3, 0])
+
+        #check line clears when changing shapes to clear multiple lines at once and not one by one
+        full_rows = get_full_rows(grid)
+        if len(full_rows) > 0:
+            for row in full_rows:
+                delete_row(grid, row)
 
     input = msvcrt.getch().decode('ASCII')
     
