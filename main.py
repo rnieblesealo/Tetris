@@ -1,16 +1,10 @@
 #Tetris by Rafa with absolutely ZERO StackOverflow ;) (And in the console! :o)
-#This code is copyrighted! Do not distribute.
 
 import numpy as np
 import sys, os, msvcrt
 
 from random import randint
-from blocks import BLOCKS, I_BLOCK
-
-#TODO add spawnchecking: cant spawn block on another one!
-#TODO give score when row is full and shift everything down
-#TODO create templates!
-#TODO prohibit next-to-wall rotation (implement hopping)
+from blocks import BLOCKS
 
 class Block:
     pos = None
@@ -146,7 +140,8 @@ def delete_row(grid, y):
 def refresh():
     os.system('cls')
     print("Score: {S}".format(S=score))
-    print("High Score: {HS}".format(HS=high_score))
+    print("Level: {L}".format(L=level))
+    print("XP: {C}/10".format(C=cleared))
     print(grid)
     print("Current Shape:\n{CS}\n".format(CS=active_block.shape[0]))
         
@@ -162,21 +157,38 @@ FULL = '□' #filled
 EMPTY = ' ' #empty
 SIZE = (10, 20)
 
+SCORE_TABLE = [40, 100, 300, 1200]
+
 score = 0
-high_score = 0
+level = 0
+cleared = 0
+
 grid = np.full((SIZE[1], SIZE[0]), EMPTY, dtype=str)
-active_block = Block(grid, I_BLOCK, [3, 0])
+active_block = Block(grid, BLOCKS[randint(0, len(BLOCKS) - 1)], [3, 0])
 
 # MAIN LOOP ======================================================================
 
 refresh()
 while True:
     if not active_block.can_move(grid, [0, 1]):
-        active_block = Block(grid, I_BLOCK, [3, 0])
+        active_block = Block(grid, BLOCKS[randint(0, len(BLOCKS) - 1)], [3, 0])
 
         #check line clears when changing shapes to clear multiple lines at once and not one by one
         full_rows = get_full_rows(grid)
         if len(full_rows) > 0:
+            #calculate level & xp
+            cleared += len(full_rows)
+            if (cleared >= 10):
+                level += int(cleared / 10)
+                cleared = cleared % 10 #if level up, put remainder xp towards next level
+            
+            #calculate score from table
+            if (len(full_rows) < len(SCORE_TABLE)):
+                score += SCORE_TABLE[len(full_rows) - 1] + (SCORE_TABLE[len(full_rows) - 1] * level)
+            else:
+                score += SCORE_TABLE[3] + (SCORE_TABLE[3] * level)
+
+            #delete & shift rows
             for row in full_rows:
                 delete_row(grid, row)
 
