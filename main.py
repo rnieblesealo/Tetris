@@ -159,7 +159,6 @@ def refresh():
     print("XP: {C}/10\n".format(C=cleared))
     print(grid, "\n")
     print("Next:\n{N}".format(N=next_block.shape[0]))
-    print("\nPosition: {P}".format(P=active_block.pos))
         
 # GLOBAL DEFINITIONS ==============================================================
 
