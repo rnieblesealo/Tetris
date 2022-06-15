@@ -54,17 +54,17 @@ class Block:
 
     def can_rotate(self, grid):
         #block can be rotated if all tiles on grid match current shape and block is within bounds (this means no tiles overlap w/rotated tile)                
+        is_within_bounds = (self.pos[1] >= 0 and self.pos[1] < SIZE[1]) and (self.pos[0] >= 0 and self.pos[0] < SIZE[0])
+                
+        if not is_within_bounds:
+            return False
+        
         for y in range(self.bounds[1]):
             for x in range(self.bounds[0]):
                 #do not consider empty blocks
                 if self.current_shape[y][x] == EMPTY:
                     continue
-                
-                is_within_bounds = (self.pos[1] >= 0 and self.pos[1] < SIZE[1]) and (self.pos[0] >= 0 and self.pos[0] < SIZE[0])
-                
-                if not is_within_bounds:
-                    return False
-                
+                                
                 matches_shape = self.current_shape[y][x] == grid[y + self.pos[1]][x + self.pos[0]]
 
                 if not matches_shape:
